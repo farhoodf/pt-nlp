@@ -1,4 +1,5 @@
 import torch.nn as nn
+from modules import RNNModule
 
 class RNNModel(nn.Module):
 	"""Container module with an encoder, a recurrent module, and a decoder."""
@@ -7,15 +8,16 @@ class RNNModel(nn.Module):
 		super(RNNModel, self).__init__()
 		self.drop = nn.Dropout(dropout)
 		self.encoder = nn.Embedding(ntoken, ninp)
-		if rnn_type in ['LSTM', 'GRU']:
-			self.rnn = getattr(nn, rnn_type)(ninp, nhid, nlayers, dropout=dropout)
-		else:
-			# try:
-			#     nonlinearity = {'RNN_TANH': 'tanh', 'RNN_RELU': 'relu'}[rnn_type]
-			# except KeyError:
-			raise ValueError( """An invalid option for `--model` was supplied,
-								 options are ['LSTM', 'GRU', 'RNN_TANH' or 'RNN_RELU']""")
-			# self.rnn = nn.RNN(ninp, nhid, nlayers, nonlinearity=nonlinearity, dropout=dropout)
+		# if rnn_type in ['LSTM', 'GRU']:
+		# 	self.rnn = getattr(nn, rnn_type)(ninp, nhid, nlayers, dropout=dropout)
+		# else:
+		# 	# try:
+		# 	#     nonlinearity = {'RNN_TANH': 'tanh', 'RNN_RELU': 'relu'}[rnn_type]
+		# 	# except KeyError:
+		# 	raise ValueError( """An invalid option for `--model` was supplied,
+		# 						 options are ['LSTM', 'GRU', 'RNN_TANH' or 'RNN_RELU']""")
+		# 	# self.rnn = nn.RNN(ninp, nhid, nlayers, nonlinearity=nonlinearity, dropout=dropout)
+		self.rnn = RNNModule.RNNModule(rnn_type='GRU', ninp=256, nhid=128, nlayers=1, dropout=0.5)
 		self.decoder = nn.Linear(nhid, ntoken)
 
 		# Optionally tie weights as in:
@@ -49,8 +51,4 @@ class RNNModel(nn.Module):
 		return decoded.view(output.size(0), output.size(1), decoded.size(1)), hidden
 
 	def init_hidden(self, bsz):
-		weight = next(self.parameters())
-		if self.rnn_type == 'LSTM':
-			return (weight.new_zeros(self.nlayers, bsz, self.nhid),weight.new_zeros(self.nlayers, bsz, self.nhid))
-		else:
-			return weight.new_zeros(self.nlayers, bsz, self.nhid)
+		return self.rnn.init_hidden(bsz)

@@ -4,7 +4,7 @@ class RNNModule(nn.Module):
 	"""Container module with an encoder, a recurrent module, and a decoder."""
 
 	def __init__(self, rnn_type='GRU', ninp=256, nhid=128, nlayers=1, dropout=0.5):
-		super(RNNModel, self).__init__()
+		super(RNNModule, self).__init__()
 		# self.drop = nn.Dropout(dropout)
 		# self.encoder = nn.Embedding(ntoken, ninp)
 		if rnn_type in ['LSTM', 'GRU']:
