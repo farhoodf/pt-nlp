@@ -20,7 +20,7 @@ epochs = 10
 ##
 
 if torch.cuda.is_available():
-	device = torch.device("gpu")
+	device = torch.device("cuda")
 else:
 	device = torch.device("cpu")
 
