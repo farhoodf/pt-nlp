@@ -1,18 +1,25 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from modules import RNNModule
+from modules import RNNModule, Dummy
 
 
 class RNNModel(nn.Module):
 	"""Container module with an encoder, a recurrent module, and a decoder."""
 
-	def __init__(self, ntoken, noutput, rnn_type='GRU', emdSize=256, nhid=128, nlayers=1, dropout=0.5, tie_weights=False, embedding=None):
+	def __init__(self, noutput, rnn_type='GRU',ntoken = 0 ,emdSize=256, nhid=128, nlayers=1, dropout=0.5, tie_weights=False, embedding=None):
 		super(RNNModel, self).__init__()
 		self.drop = nn.Dropout(dropout)
+		init_embed = False
 		if embedding is None:
-			self.encoder = nn.Embedding(ntoken, emdSize)
-		else:
+			if ntoken == 0:
+				self.encoder = Dummy.Dummy()
+			else:
+				self.encoder = nn.Embedding(ntoken, emdSize)
+				init_embed = True
+		elif issubclass(type(embedding),nn.Module):
 			self.encoder = embedding
+		else:
+			raise ValueError('The type of Embedding is not defined')
 
 		
 		# if rnn_type in ['LSTM', 'GRU']:
@@ -34,7 +41,7 @@ class RNNModel(nn.Module):
 		# "Tying Word Vectors and Word Classifiers: A Loss Framework for Language Modeling" (Inan et al. 2016)
 		# https://arxiv.org/abs/1611.01462
 
-		self.init_weights(embedding)
+		self.init_weights(init_embed)
 
 		self.rnn_type = rnn_type
 		self.nhid = nhid
@@ -42,9 +49,9 @@ class RNNModel(nn.Module):
 
 		# self.softmax = 
 
-	def init_weights(self, embedding):
+	def init_weights(self, init_embed):
 		initrange = 0.1
-		if embedding is None:
+		if init_embed:
 			self.encoder.weight.data.uniform_(-initrange, initrange)
 		self.decoder.bias.data.zero_()
 		self.decoder.weight.data.uniform_(-initrange, initrange)
