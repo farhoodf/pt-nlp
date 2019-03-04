@@ -1,8 +1,9 @@
 import os
 import torch
 import numpy as np
+from torch.utils.data import Dataset
 
-class ArxivBinary(object):
+class ArxivBinary(Dataset):
 	"""docstring for ArxivBinary"""
 	def __init__(self, root_dir, transform=None, preload=False ,maxlen=30):
 		super(ArxivBinary, self).__init__()
@@ -36,13 +37,15 @@ class ArxivBinary(object):
 		if self.transform:
 			data = self.transform(data)
 
-		return {'data':data,'label':label, 'len':len(data)}
+		return {'data':data,'label':label, 'lengths':len(data)}
 
 	def __pad__(self,data):
-		padded = np.zeros((self.maxlen,), dtype=data.dtype)
-        if len(data) > self.maxlen: 
-        	padded[:] = data[:self.maxlen]
-        else: 
-        	padded[:len(data)] = data
+		shape = list(data.shape)
+		shape[1] = self.maxlen
+		padded = np.zeros((shape), dtype=data.dtype)
+		if data.shape[1] > self.maxlen: 
+			padded[:] = data[:,:self.maxlen,:]
+		else: 
+			padded[:,:data.shape[1],:] = data
 		return padded
 

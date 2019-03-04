@@ -6,7 +6,7 @@ from modules import RNNModule, Dummy
 class RNNModel(nn.Module):
 	"""Container module with an encoder, a recurrent module, and a decoder."""
 
-	def __init__(self, noutput, rnn_type='GRU',ntoken = 0 ,emdSize=256, nhid=128, nlayers=1, dropout=0.5, tie_weights=False, embedding=None):
+	def __init__(self, noutput, rnn_type='GRU',ntoken = 0 ,emdSize=256, nhid=256, nlayers=1, dropout=0.5, tie_weights=False, embedding=None):
 		super(RNNModel, self).__init__()
 		self.drop = nn.Dropout(dropout)
 		init_embed = False
@@ -57,7 +57,7 @@ class RNNModel(nn.Module):
 		self.decoder.weight.data.uniform_(-initrange, initrange)
 
 	def forward(self, x, lengths):
-		_, batch_size = x.size()
+		batch_size = x.size()[1]
 		#initial hidden states
 		hidden = self.init_hidden(batch_size)
 		x = self.drop(self.encoder(x))
