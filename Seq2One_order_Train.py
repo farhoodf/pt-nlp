@@ -116,7 +116,39 @@ def train_epoch(model, dataset, device, lr,epoch = 1):
 		
 	return total_epoch_loss/steps, total_epoch_acc/steps
 
-
+def eval(model,dataset,device):
+	dataloader = DataLoader(dataset, batch_size=args.batch_size,shuffle=False, num_workers=4)
+	loss_fn = nn.CrossEntropyLoss()
+	total_epoch_loss = 0
+	total_epoch_acc = 0
+	# model.cuda()
+#     optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),lr = 0.001)
+#     optim = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+	steps = 0
+	model.eval() # check this
+	with torch.no_grad():
+		for i_batch, batch in enumerate(dataloader):
+			x = prepare_batch(batch['data'].to(device=device))
+			y = batch['label'].to(device=device)
+			lengths = batch['lengths']
+			# x,x_len,y = prepare_batch(x,y)
+			# y = torch.autograd.Variable(y).long()
+	#         optim.zero_grad()
+			# model.zero_grad()
+			y_hat = model(x,lengths)
+			loss = loss_fn(y_hat,y)
+			num_currect = (torch.max(y_hat, 1)[1].view(y.size()).data == y.data).float().sum()
+			acc = 100.0 * num_currect/args.batch_size
+			# loss.backward()
+			# optim.step()
+			
+			steps += 1
+			total_epoch_loss += loss.item()
+			total_epoch_acc += acc.item()
+		
+		# if steps % args.log_interval == 0:
+			# print (f'Epoch: {epoch}, batch: {steps}, Training Loss: {total_epoch_loss/steps:.4f}, Training Accuracy: {total_epoch_acc/steps: .2f}%')
+		return total_epoch_loss/steps, total_epoch_acc/steps
 
 def train(model,dataset,device):
 
@@ -142,6 +174,7 @@ def train(model,dataset,device):
 	except KeyboardInterrupt:
 		print('-' * 89)
 		print('Exiting from training early')
+
 
 def main():
 	device = 'cpu'
