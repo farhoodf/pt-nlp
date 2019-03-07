@@ -192,8 +192,8 @@ def train(model,train_dataset,device='cuda',val_dataset=None):
 				print('| end of epoch {:3d} | time: {:5.2f}s | validation loss {:5.2f} | '
 						'validation accuracy {:8.2f}'.format(epoch, (time.time() - start_time),
 											   val_loss.average(), val_acc.average()))
-				val_log['acc'].update(val_acc)
-				val_log['loss'].update(val_loss)
+				validation_log['acc'].update(val_acc.average())
+				validation_log['loss'].update(val_loss.average())
 			print('-' * 89)
 			# Save the model if the validation loss is the best we've seen so far.
 			# if not best_val_loss or val_loss < best_val_loss:
