@@ -49,6 +49,11 @@ parser.add_argument('--cpu', default=False, action='store_true',
 parser.add_argument('--clip', default=5, type=float,
 					metavar='F', help='Gradient Clipping')
 
+parser.add_argument('--maxlen', default=60, type=int,
+					metavar='N', help='Maximum lengths of sentences')
+parser.add_argument('--lr-decay', default=1, type=float,
+					metavar='F', help='Decay the learning rate after each epoch without improvement')
+
 
 args = parser.parse_args()
 
@@ -59,7 +64,7 @@ def load_model(path):
 	return
 
 def load_dataset(path):
-	dataset = ArxivBinary(path)
+	dataset = ArxivBinary(path,maxlen=args.maxlen)
 	return dataset
 def load_model():
 	# RNN = RNNModel
@@ -173,12 +178,14 @@ def evaluate(model,dataset,device):
 		return total_loss, total_acc
 
 def train(model,train_dataset,device='cuda',val_dataset=None):
+	lr = args.lr
 	train_log = {'acc':AverageMeter(),'loss':AverageMeter()}
 	validation_log = {'acc':AverageMeter(),'loss':AverageMeter()}
 	try:
 		for epoch in range(1, args.epochs+1):
+			print('Training with learning rate of: ' + f'{lr:1.6f}')
 			start_time = time.time()
-			train_loss,train_acc = train_epoch(model,train_dataset,epoch=epoch,device=device,lr=args.lr)
+			train_loss,train_acc = train_epoch(model,train_dataset,epoch=epoch,device=device,lr=lr)
 			train_log['acc'].update(train_acc.average())
 			train_log['loss'].update(train_loss.average())
 			
@@ -192,6 +199,9 @@ def train(model,train_dataset,device='cuda',val_dataset=None):
 				print('| end of epoch {:3d} | time: {:5.2f}s | validation loss {:5.2f} | '
 						'validation accuracy {:8.2f}'.format(epoch, (time.time() - start_time),
 											   val_loss.average(), val_acc.average()))
+				if epoch > 1:
+					if validation_log['loss'].vals[-1] < val_loss.average():
+						lr = lr * args.lr_decay
 				validation_log['acc'].update(val_acc.average())
 				validation_log['loss'].update(val_loss.average())
 			print('-' * 89)

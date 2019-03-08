@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from modules import RNNModule, Dummy
+from modules import RNNModule, Dummy, Embedding
 
 
 class RNNModel(nn.Module):
@@ -14,7 +14,7 @@ class RNNModel(nn.Module):
 			if ntoken == 0:
 				self.encoder = Dummy.Dummy()
 			else:
-				self.encoder = nn.Embedding(ntoken, emdSize)
+				self.encoder = Embedding.Embeddings(ntoken, emdSize)
 				init_embed = True
 		elif issubclass(type(embedding),nn.Module):
 			self.encoder = embedding
