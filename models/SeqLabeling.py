@@ -52,7 +52,7 @@ class RNNModel(nn.Module):
 	def init_weights(self, init_embed):
 		initrange = 0.1
 		if init_embed:
-			self.encoder.weight.data.uniform_(-initrange, initrange)
+			self.encoder.embedding.weight.data.uniform_(-initrange, initrange)
 		self.decoder.bias.data.zero_()
 		self.decoder.weight.data.uniform_(-initrange, initrange)
 

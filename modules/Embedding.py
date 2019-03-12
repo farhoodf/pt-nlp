@@ -1,4 +1,6 @@
+import torch
 import torch.nn as nn
+import numpy as np
 
 
 class Embeddings(nn.Module):
@@ -14,12 +16,12 @@ class Embeddings(nn.Module):
 
 		assert type(word_to_index) == dict, 'The type of word_to_index is not supported.'
 		
-		for word in word_to_index
+		for word in word_to_index:
 			if word.lower() in gloves_vector:
 				indx = word_to_index[word]
 				vec = torch.FloatTensor(gloves_vector[word])
 
-				self.embedding.weight.data[idx,:].set_(vec)
+				self.embedding.weight.data[indx,:].set_(vec)
 
 	def load_GloVe(self, path):
 		with open(path,'r') as f:
