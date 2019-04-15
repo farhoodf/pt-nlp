@@ -1,12 +1,18 @@
+import os
+import torch
+import numpy as np
+from torch.utils.data import Dataset
+
 class Arxiv(Dataset):
 	"""docstring for ArxivClassify"""
-	def __init__(self, path, word_to_index=None, transform=None, pad_token=''):
-		super(ArxivClassify, self).__init__()
+	def __init__(self, path, word_to_index=None, transform=None, pad_token='',limit=None):
+		super(Arxiv, self).__init__()
 
 		self.data = []
 		self.transform = transform
 		self.pad_token = pad_token
 		self.path = path
+		self.limit = limit
 		self.__load_data__()
 		print('from data: data loaded')
 		self.word_to_index = word_to_index
@@ -35,21 +41,22 @@ class Arxiv(Dataset):
 			raw = f.read()
 		
 		docs = raw.split('\n\n')
-		
+		if self.limit is not None:
+			docs = docs[:self.limit]
 		self.data = []
 		for doc in docs:
 			sentences = doc.split('\n')
-			lenghts = []
+			lengths = []
 			labels = []
 			for i in range(len(sentences)):
 				sentences[i] = sentences[i].strip().split()
-				lenghts.append(len(sentences[i]))
-				labels.append[i]
+				lengths.append(len(sentences[i]))
+				labels.append(i)
 
 				# if sentences[i][-1] == '.':
 					# sentences[i] = sentences[i][:-1]
 				
-			data.append({'data':sentences, 'label':labels, 'lengths':lengths})
+			self.data.append({'data':sentences, 'labels':labels, 'lengths':lengths})
 		
 
 		
